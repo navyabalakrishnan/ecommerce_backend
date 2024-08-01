@@ -65,6 +65,20 @@ export const createOrder = async (req, res) => {
     return res.status(500).send({ message: "Failed to create order", error: error.message });
   }
 };
+export const getOrder=async(req,res)=>
+{
+    try{
+        const orders=await Order.find()
+        console.log(orders)
+        return res.send(orders)
+    }
+    catch(error)
+    {
+        console.log("something wentwronh",error)
+res.send("failed tofetch data")
+    }
+
+    }
 
 export const cancelOrder=  async(req,res)=>
 {
