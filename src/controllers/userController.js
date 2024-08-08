@@ -1,12 +1,30 @@
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import bcrypt from 'bcrypt';
-
+export const checkUser=async (req,res)=>
+{
+  try
+  {
+    const user=req.user;
+    const findUser=await User.findOne({email:user.email});
+    if(!findUser){
+      return res.send("user not found");
+    
+    }
+    return res.send("user found")
+  }
+  catch(error){
+    console.log(error)
+  }
+}
 export const signup = async (req, res) => {
     try {
-        const {name,email,password} = req.body;
+        const {name,email,password,confirmPassword} = req.body;
         console.log(email);
 
+        if (password !== confirmPassword) {
+            return res.status(400).send("Passwords do not match");
+        }
         const userExist = await User.findOne({ email });
 console.log(userExist)
         if (userExist) {
@@ -37,7 +55,7 @@ console.log(userExist)
     }
 };
 
-export const ping = (req, res) => res.send("pong");
+
 
 
 
