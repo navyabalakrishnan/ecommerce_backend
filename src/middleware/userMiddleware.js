@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
 
 import serverConfig from "../config/serverConfig.js";
-
-
-
 function authenticateUser(req, res, next) {
   const token = req.cookies.token;
 
@@ -17,6 +14,7 @@ function authenticateUser(req, res, next) {
 
     next();
   });
+
 }
 
-export default authenticateUser;;
+export default authenticateUser;

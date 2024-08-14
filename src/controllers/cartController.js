@@ -1,27 +1,78 @@
 
 import Cart from "../models/cartModel.js";
 import Product from "../models/productModel.js";
+import jwt from 'jsonwebtoken'
+// export const createCart = async (req, res) => {
+
+//   const { product, quantity, userId } = req.body;
+
+//   try {
+//       if (!userId) {
+//       return res.status(400).send({ message: "User ID is required" });
+//     }
+
+//     const item = await Product.findById(product);
+
+//     if (!item) {
+//       return res.status(404).send({ message: "Product not found" });
+//     }
+
+//     const price = item.price;
+
+   
+//     let cart = await Cart.findOne({ userId });
+
+//     if (cart) {
+//       const itemIndex = cart.items.findIndex((cartItem) => cartItem.product.toString() === product);
+
+//       if (itemIndex > -1) {
+//         let cartItem = cart.items[itemIndex];
+//         cartItem.quantity += quantity;
+//         cart.items[itemIndex] = cartItem;
+//       } else {
+//         cart.items.push({ product, quantity });
+//       }
+
+//       cart.total = cart.items.reduce((acc, curr) => acc + curr.quantity * price, 0);
+//       await cart.save();
+//       return res.status(200).send(cart);
+//     } else {
+
+//       const newCart = await Cart.create({
+//         userId,
+//         items: [{ product, quantity }],
+//         total: quantity * price,
+//       });
+//       return res.status(201).send(newCart);
+//     }
+//   } catch (error) {
+//     console.error("Error adding to cart:", error);
+//     return res.status(500).send("Something went wrong");
+//   }
+// };
 
 export const createCart = async (req, res) => {
-
-  const { product, quantity, userId } = req.body;
-
+  const { product, quantity } = req.body;
+  const userId = req.user._id;
   try {
+    // Access token from cookie
+    const token = req.cookies.token; // Replace 'authToken' with your cookie name
 
- 
-    if (!userId) {
-      return res.status(400).send({ message: "User ID is required" });
+    if (!token) {
+      return res.status(401).send({ message: 'Unauthorized' });
     }
 
-    const item = await Product.findById(product);
+    // Decode token
+    const decoded = jwt.verify(token, 'jklres'); // Replace 'your_secret_key' with your actual secret
 
+    req.user = decoded;// Assuming 'userId' is the claim in your token
+
+    const item = await Product.findById(product);
     if (!item) {
       return res.status(404).send({ message: "Product not found" });
     }
 
     const price = item.price;
-
-   
     let cart = await Cart.findOne({ userId });
 
     if (cart) {
@@ -39,9 +90,8 @@ export const createCart = async (req, res) => {
       await cart.save();
       return res.status(200).send(cart);
     } else {
-
       const newCart = await Cart.create({
-        userId,
+        userId:req.user._id,
         items: [{ product, quantity }],
         total: quantity * price,
       });
@@ -52,7 +102,6 @@ export const createCart = async (req, res) => {
     return res.status(500).send("Something went wrong");
   }
 };
-
 
 export const updateCart = async (req, res) => {
   try {
@@ -114,12 +163,11 @@ export const getCart = async (req, res) => {
     }
 
     const cart = await Cart.findOne({ userId }).populate('items.product');
-
+    return res.status(200).send({ message: "added to cart" });
     if (!cart) {
       return res.status(404).send({ message: "Cart not found" });
     }
-
-    return res.status(200).send(cart);
+      return res.status(200).send(cart);
   } catch (error) {
     console.error("Error fetching cart:", error);
     return res.status(500).send({ message: "Failed to retrieve cart", error: error.message });

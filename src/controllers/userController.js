@@ -48,6 +48,7 @@ console.log(userExist)
 
         const token = generateToken(email);
         res.cookie("token", token);
+        
         res.send( "Signed up successfully!" );
     } catch (error) {
         console.log(error, "Something went wrong");
@@ -60,29 +61,57 @@ console.log(userExist)
 
 
 
+// export const signin = async (req, res) => {
+//     try {
+//       const { email, password } = req.body;
+  
+//       const user = await User.findOne({ email });
+  
+//       if (!user) {
+//         return res.send("User  does not exist");
+//       }
+  
+//       const matchPassword = await bcrypt.compare(password, user.hashPassword);
+  
+//       if (!matchPassword) {
+//         return res.send("Password incorrect");
+        
+//       }
+  
+//       const token = generateToken(email);
+     
+//       res.cookie("token", token);
+   
+//       res.send("Logged in!")
+//     } catch (error) {
+//       console.log(error, "Something wrong");
+//       res.status(500).send("Internal Server Error");
+//     }
+//   };
 export const signin = async (req, res) => {
-    try {
-      const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
   
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.send("User  does not exist");
-      }
-  
-      const matchPassword = await bcrypt.compare(password, user.hashPassword);
-  
-      if (!matchPassword) {
-        return res.send("Password incorrect");
-      }
-  
-      const token = generateToken(email);
-      res.cookie("token", token);
-      res.send("Logged in!");
-      console.log(token)
-    } catch (error) {
-      console.log(error, "Something wrong");
-      res.status(500).send("Internal Server Error");
+    if (!user) {
+      return res.send("User does not exist");
     }
-  };
-  
+   
+    const matchPassword = await bcrypt.compare(password, user.hashPassword);
+
+    if (!matchPassword) {
+      return res.send("Password incorrect");
+    }
+
+    const token = generateToken(user._id);
+
+   
+    res.cookie("token", token);
+
+    res.send("Logged in!");
+  } catch (error) {
+    console.log(error, "Something went wrong");
+    res.status(500).send("Internal Server Error");
+  }
+};

@@ -64,6 +64,20 @@ export const getProducts = async (req, res) => {
    res.send("failed to fetch data")
  }
 }
+export const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    return res.json(product);
+  } catch (error) {
+    console.error("Something went wrong:", error);
+    res.status(500).json({ message: "Failed to fetch product" });
+  }
+};
+
 
 export const updateProduct = async (req, res) => {
  try {
@@ -102,3 +116,19 @@ export const deleteProduct = async (req, res) => {
    res.send("failed to delete")
  }
 }
+export const getProductsBySeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const seller = await Seller.findById(id);
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    const products = await Product.find({ seller: seller._id });
+    return res.json(products);
+  } catch (error) {
+    console.error("Something went wrong:", error);
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
+};

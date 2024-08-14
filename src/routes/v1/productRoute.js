@@ -2,13 +2,14 @@
 import express from "express";
 import { upload } from "../../middleware/uploadMiddleware.js";
 import authenticateSeller from "../../middleware/sellerMiddleware.js";
-import { createProduct, getProducts, updateProduct,deleteProduct} from "../../controllers/productController.js";
+import { createProduct, getProducts, getProductById,  getProductsBySeller,updateProduct,deleteProduct} from "../../controllers/productController.js";
 
 
 const productRouter = express.Router();
 productRouter.get("/", getProducts);
+productRouter.get("/:id",  getProductById);
 productRouter.post("/add-products", upload.single("image"),authenticateSeller, createProduct);
 productRouter.put("/:id", authenticateSeller,updateProduct );
 productRouter.delete("/:id", deleteProduct);
-
+productRouter.get("/manage-products/:id", getProductsBySeller);
 export default productRouter;
