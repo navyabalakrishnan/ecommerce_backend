@@ -2,61 +2,62 @@ import Order from '../models/orderModel.js';
 import Cart from '../models/cartModel.js';
 import User from '../models/userModel.js';
 import Product from '../models/productModel.js';
+import jwt from "jsonwebtoken"
+import mongoose from 'mongoose';
+import serverConfig from '../config/serverConfig.js';
+
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, shippingAddress, paymentMethod, paymentStatus } = req.body;
+    const { full_name, email, shippingAddress, paymentMethod } = req.body;
 
-    if (!userId || !shippingAddress || !paymentMethod) {
-      return res.status(400).send({ message: "Missing required fields" });
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
     }
+    console.log(token)
+    const decoded = jwt.verify(token, serverConfig.token);
+    console.log("decoded",decoded)
+    const user = new mongoose.Types.ObjectId(decoded.username);
+    const userId = await User.findById(user);
 
-    if (!['onlinePayment', 'cash_on_delivery'].includes(paymentMethod)) {
-      return res.status(400).send({ message: "Invalid payment method" });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send({ message: "User not found" });
-    }
-
+  
     const cart = await Cart.findOne({ userId }).populate('items.product');
-    if (!cart) {
-      return res.status(404).send({ message: "Cart not found" });
+    console.log("cart ",cart)
+
+    if (!cart || cart.items.length === 0) {
+      return res.status(404).send({ message: "Cart is empty or not found" });
     }
 
-    if (cart.items.length === 0) {
-      return res.status(400).send({ message: "Cart is empty" });
-    }
+    const paymentStatus = paymentMethod === 'cash_on_delivery' ? 'unpaid' : 'paid';
 
     let totalAmount = 0;
-    const orderProducts = [];
+    const orderProducts = cart.items.map(item => {
+      totalAmount += item.quantity * item.product.price;
+      return {
+        product: item.product._id,
+        quantity: item.quantity,
+        seller: item.product.seller,
+      };
+    });
 
-    for (const item of cart.items) {
-      const product = await Product.findById(item.product._id).populate('seller');
-      if (product && product.seller) {
-        totalAmount += item.quantity * product.price;
-        orderProducts.push({
-          product: item.product._id,
-          quantity: item.quantity,
-          seller: product.seller._id
-        });
-      } else {
-        return res.status(400).send({ message: "Product or seller not found" });
-      }
-    }
-
+    console.log("paymentStatus" ,paymentStatus)
+    console.log("paymentMethod" ,paymentMethod)
+  
     const newOrder = new Order({
       userId,
+      full_name,
+      email,
       products: orderProducts,
       totalAmount,
-      shippingAddress,
+      shippingAddress, 
       paymentMethod,
-      paymentStatus
+      paymentStatus,
     });
 
     const savedOrder = await newOrder.save();
 
+   
     await Cart.updateOne({ userId }, { $set: { items: [], total: 0 } });
 
     return res.status(201).send({ message: "Order created successfully", order: savedOrder });
@@ -65,32 +66,31 @@ export const createOrder = async (req, res) => {
     return res.status(500).send({ message: "Failed to create order", error: error.message });
   }
 };
-export const getOrder=async(req,res)=>
-{
-    try{
-        const orders=await Order.find()
-        console.log(orders)
-        return res.send(orders)
-    }
-    catch(error)
-    {
-        console.log("something wentwronh",error)
-res.send("failed tofetch data")
-    }
 
-    }
 
-export const cancelOrder=  async(req,res)=>
-{
-    try{
-        const{orderId}=req.params;
-        const cancelOrder=await Order.findByIdAndDelete(orderId)
-        console.log("Order is Cancelled ") 
-        return res.send({message:"order is cancelled",cancelOrder })
-    }
-    catch(error){
-        console.log("Error:",error)
-    }  
-    }
 
- 
+export const getOrder = async (req, res) => {
+  try {
+    const orders = await Order.find()
+    console.log(orders)
+    return res.send(orders)
+  }
+  catch (error) {
+    console.log("something wentwronh", error)
+    res.send("failed tofetch data")
+  }
+
+}
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const cancelOrder = await Order.findByIdAndDelete(orderId)
+    console.log("Order is Cancelled ")
+    return res.send({ message: "order is cancelled", cancelOrder })
+  }
+  catch (error) {
+    console.log("Error:", error)
+  }
+}
+

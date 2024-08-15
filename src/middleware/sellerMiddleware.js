@@ -19,7 +19,6 @@ const authenticateSeller=(req,res,next)=>
             req.user=result;
             next();
 
-        
     })
 }
 export default authenticateSeller

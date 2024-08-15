@@ -5,9 +5,10 @@ import { getCart,createCart,updateCart,deleteCartitem} from "../../controllers/c
 
 
 const cartRouter = express.Router();
-cartRouter.get("/:userId",  getCart);
-cartRouter.post("/addtocart",  createCart);
-cartRouter.put("/:id", updateCart);
-cartRouter.delete("/:cartId/:productId", deleteCartitem);
+cartRouter.get("/",  getCart);
+cartRouter.post("/addtocart", createCart);
+
+cartRouter.put("/update", updateCart);
+cartRouter.delete("/:productId", deleteCartitem);
 
 export default cartRouter;

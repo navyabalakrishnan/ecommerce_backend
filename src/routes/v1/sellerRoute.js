@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, signin, getSellers, deleteSeller,checkAdmin} from "../../controllers/sellerController.js";
+import { signup, signin, getSellers, deleteSeller, checkAdmin} from "../../controllers/sellerController.js";
 import authenticateSeller from "../../middleware/sellerMiddleware.js";
 const sellerRouter = express.Router();
 
