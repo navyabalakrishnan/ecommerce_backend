@@ -5,7 +5,7 @@ import Product from '../models/productModel.js';
 import jwt from "jsonwebtoken"
 import mongoose from 'mongoose';
 import serverConfig from '../config/serverConfig.js';
-
+import Seller from '../models/sellerModel.js';
 
 export const createOrder = async (req, res) => {
   try {
@@ -68,20 +68,41 @@ export const createOrder = async (req, res) => {
 };
 
 
-
-export const getOrder = async (req, res) => {
-  try {
-    const orders = await Order.find()
-    console.log(orders)
-    return res.send(orders)
-  }
-  catch (error) {
-    console.log("something wentwronh", error)
-    res.send("failed tofetch data")
-  }
-
-}
-
+  export const getOrder = async (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      if (!token) return res.sendStatus(401);
+  
+      const decoded = jwt.verify(token, 'jklres');
+      const seller = await Seller.findOne({ email: decoded.data });
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+  
+      const sellerId = seller._id;
+  
+      const orders = await Order.find({
+        'products.seller': sellerId
+      }).populate('products.product');
+  
+      const filteredOrders = orders.map(order => {
+        const filteredProducts = order.products.filter(product => 
+          product.seller.toString() === sellerId.toString()
+        );
+        return {
+          ...order.toObject(),
+          products: filteredProducts
+        };
+      });
+  
+      res.json(filteredOrders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).send("Failed to fetch data");
+    }
+  };
+  
 export const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;

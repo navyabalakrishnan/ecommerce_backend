@@ -8,4 +8,8 @@ sellerRouter.post("/signin", signin);
 sellerRouter.get("/get-sellers", getSellers);
 sellerRouter.delete("/:id", deleteSeller);
 sellerRouter.get("/check-seller",authenticateSeller,checkAdmin);
+sellerRouter.post("/logout", (req, res) => {
+    res.clearCookie('token'); 
+    res.status(200).send({ message: 'Logged out successfully' });
+});
 export default sellerRouter;

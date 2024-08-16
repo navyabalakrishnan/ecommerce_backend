@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import { cloudinaryInstance } from "../config/cloudinaryConfig.js";
 export const createProduct = async (req, res) => {
   try {
-    console.log("hitted");
+   
     if (!req.file) {
       return res.send("file is not visible")
     }
@@ -105,17 +105,20 @@ export const updateProduct = async (req, res) => {
 }
 export const deleteProduct = async (req, res) => {
   try {
-    const { id } = req.params
-    const deleteProduct = await Product.deleteOne({ id });
-    console.log("product is deleted")
+    const { id } = req.params;
+    const result = await Product.deleteOne({ _id: id });
+    if (result.deletedCount === 0) {
+      return res.status(404).send({ message: "Product not found" });
+    }
 
-    return res.send(deleteProduct)
+    res.status(200).send({ message: "Product deleted successfully" });
 
   } catch (error) {
-    console.log("something went wrong", error)
-    res.send("failed to delete")
+    console.error("Something went wrong:", error);
+    res.status(500).send({ message: "Failed to delete product" });
   }
-}
+};
+
 export const getProductsBySeller = async (req, res) => {
   try {
 
@@ -127,7 +130,7 @@ export const getProductsBySeller = async (req, res) => {
       return res.status(401).send({ message: 'Unauthorized' });
     }
 
-    const decoded = jwt.verify(token, 'serverConfig.token'); 
+    const decoded = jwt.verify(token, 'jklres'); 
     console.log("decoded", decoded)
 
     const seller = await Seller.findOne({ email: decoded.data });

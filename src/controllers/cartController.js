@@ -4,31 +4,28 @@ import jwt from 'jsonwebtoken'
 import User from '../models/userModel.js';
 import mongoose from "mongoose";
 import serverConfig from "../config/serverConfig.js";
+
 export const createCart = async (req, res) => {
   const { product, quantity } = req.body;
+
   try {
    
-    const token = req.cookies.token; 
-    console.log("token ", token)
+    const token = req.cookies.token;
+    console.log("token ", token);
+
     if (!token) {
       return res.status(401).send({ message: 'Unauthorized' });
     }
+    const decoded = jwt.verify(token, 'jklres');
+    const userId = new mongoose.Types.ObjectId(decoded.username); 
 
- 
-    const decoded = jwt.verify(token, 'serverConfig.token'); 
-    console.log("decoded",decoded)
-    const user = new mongoose.Types.ObjectId(decoded.username);
-    const userId = await User.findById(user);
+    console.log("userId", userId);
 
-    console.log("decoded", decoded)
-    console.log("user", user)
-
-    if (!user) {
-      return res.status(404).send({ message: 'User not found' });
+    if (!userId) {
+      return res.status(404).send({ message: 'User ID not found in token' });
     }
 
-    req.user = decoded;
-
+ 
     const item = await Product.findById(product);
     if (!item) {
       return res.status(404).send({ message: "Product not found" });
@@ -36,33 +33,34 @@ export const createCart = async (req, res) => {
 
     const price = item.price;
 
-    let cart = await Cart.findOne({ userId });
-    console.log("cart", cart)
+   
+    let cart = await Cart.findOne({ userId: userId });
+    console.log("cart", cart);
+
     if (cart) {
-      console.log("Hi Inside cart ",product)
       const itemIndex = cart.items.findIndex((cartItem) => cartItem.product.toString() === product);
 
       if (itemIndex > -1) {
-        let cartItem = cart.items[itemIndex];
-        cartItem.quantity += quantity;
-        cart.items[itemIndex] = cartItem;
+        cart.items[itemIndex].quantity += quantity;
       } else {
         cart.items.push({ product, quantity });
       }
 
-      console.log("cart.items ",cart.items)
+ 
       cart.total = cart.items.reduce((acc, curr) => acc + curr.quantity * price, 0);
-      console.log("cart Total", cart.total)
-      console.log("cart save",cart)
+      console.log("cart Total", cart.total);
+
       await cart.save();
       return res.status(200).send(cart);
     } else {
+     
+      console.log("Creating a new cart");
       const newCart = await Cart.create({
         userId: userId,
         items: [{ product, quantity }],
         total: quantity * price,
       });
-      console.log(res.status)
+
       return res.status(201).send(newCart);
     }
   } catch (error) {
@@ -70,7 +68,6 @@ export const createCart = async (req, res) => {
     return res.status(500).send("Something went wrong");
   }
 };
-
 
 
 export const updateCart = async (req, res) => {
@@ -132,7 +129,7 @@ export const getCart = async (req, res) => {
       return res.status(401).send({ message: 'Unauthorized' });
     }
 
-    const decoded = jwt.verify(token, 'serverConfig.token'); 
+    const decoded = jwt.verify(token, 'jklres'); 
 
     const user = new mongoose.Types.ObjectId(decoded.username);
     const userId = await User.findById(user);
@@ -158,24 +155,25 @@ export const getCart = async (req, res) => {
 };
 
 
+
+
 export const deleteCartitem = async (req, res) => {
   try {
-    const { cartId, productId } = req.params;
-
-
+    const { productId } = req.params;
+    const { cartId } = req.body; 
+    if (!cartId) {
+      return res.status(400).send({ message: "Cart ID is required" });
+    }
 
     const cart = await Cart.findById(cartId);
     if (!cart) {
       return res.status(404).send({ message: "Cart not found" });
     }
 
-
     const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
-
     if (itemIndex === -1) {
       return res.status(404).send({ message: "Product not found in cart" });
     }
-
 
     cart.items.splice(itemIndex, 1);
 
@@ -184,10 +182,9 @@ export const deleteCartitem = async (req, res) => {
 
     cart.total = cart.items.reduce((acc, item) => acc + item.quantity * (productMap.get(item.product.toString()) || 0), 0);
 
-
     const updatedCart = await cart.save();
 
-    return res.status(200).send(updatedCart);
+    return res.status(200).send({ message: "Item is deleted", cart: updatedCart });
   } catch (error) {
     console.error("Error deleting cart item:", error);
     return res.status(500).send({
