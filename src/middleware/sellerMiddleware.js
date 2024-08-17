@@ -11,7 +11,7 @@ const authenticateSeller=(req,res,next)=>
             console.log(err)
             return res.status(401).send("not verified")
         } 
-        console.log("seller token",result)
+        console.log("role",result.role)
         if(result.role !== "seller" && result.role !== "admin" )
         {
             return res.status(401).send("not seller and admin")

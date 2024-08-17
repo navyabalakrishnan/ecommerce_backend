@@ -38,8 +38,9 @@ export const signup = async (req, res) => {
   };
 export const signin = async (req, res) => {
     try {
+      const body = req.body;
       const { email, password } = req.body;
-  
+      console.log(body);
       const seller = await Seller.findOne({ email });
       if (!seller) {
         return res.status(404).send("Seller not found");
@@ -50,7 +51,7 @@ export const signin = async (req, res) => {
         return res.status(400).send("Password is incorrect");
       }
   
-      const token = adminToken(seller._id);
+      const token = adminToken(seller);
       res.cookie("token", token);
   
       return res.status(200).json({
@@ -118,4 +119,3 @@ export const signin = async (req, res) => {
     checkAdmin
   };
   
- 

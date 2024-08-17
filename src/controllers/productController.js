@@ -119,6 +119,7 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+
 export const getProductsBySeller = async (req, res) => {
   try {
 
@@ -146,7 +147,7 @@ export const getProductsBySeller = async (req, res) => {
       productName: product.productName,
       price: product.price,
       category: product.category,
-      stock: product.stock,
+     
     }));
 
     return res.json(formattedProducts);
