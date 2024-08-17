@@ -5,7 +5,7 @@ import { createCategory,getCategory} from "../../controllers/categoryController.
 
 const  categoryRouter = express.Router();
 
-categoryRouter.post("/addcategory",  createCategory);
+categoryRouter.post("/create",  createCategory);
 categoryRouter.get("/get-category",  getCategory);
 
 export default categoryRouter;

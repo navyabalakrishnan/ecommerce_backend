@@ -6,6 +6,11 @@ const productSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     category: { type: String, required: true },
    image: [{ type: String }],
+   rating: { type: Number, default: 0 },
+    numReviews: { type: Number, default: 0 },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+   
+   
     seller: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
 }, { timestamps: true });
 

@@ -4,28 +4,21 @@ import jwt from 'jsonwebtoken'
 import User from '../models/userModel.js';
 import mongoose from "mongoose";
 import serverConfig from "../config/serverConfig.js";
-
 export const createCart = async (req, res) => {
   const { product, quantity } = req.body;
 
   try {
-   
     const token = req.cookies.token;
-    console.log("token ", token);
-
     if (!token) {
       return res.status(401).send({ message: 'Unauthorized' });
     }
     const decoded = jwt.verify(token, 'jklres');
-    const userId = new mongoose.Types.ObjectId(decoded.username); 
-
-    console.log("userId", userId);
+    const userId = new mongoose.Types.ObjectId(decoded.username);
 
     if (!userId) {
       return res.status(404).send({ message: 'User ID not found in token' });
     }
 
- 
     const item = await Product.findById(product);
     if (!item) {
       return res.status(404).send({ message: "Product not found" });
@@ -33,28 +26,19 @@ export const createCart = async (req, res) => {
 
     const price = item.price;
 
-   
     let cart = await Cart.findOne({ userId: userId });
-    console.log("cart", cart);
 
     if (cart) {
       const itemIndex = cart.items.findIndex((cartItem) => cartItem.product.toString() === product);
-
       if (itemIndex > -1) {
         cart.items[itemIndex].quantity += quantity;
       } else {
         cart.items.push({ product, quantity });
       }
-
- 
       cart.total = cart.items.reduce((acc, curr) => acc + curr.quantity * price, 0);
-      console.log("cart Total", cart.total);
-
       await cart.save();
       return res.status(200).send(cart);
     } else {
-     
-      console.log("Creating a new cart");
       const newCart = await Cart.create({
         userId: userId,
         items: [{ product, quantity }],
@@ -123,13 +107,13 @@ export const updateCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
   try {
-    
+
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).send({ message: 'Unauthorized' });
     }
 
-    const decoded = jwt.verify(token, 'jklres'); 
+    const decoded = jwt.verify(token, 'jklres');
 
     const user = new mongoose.Types.ObjectId(decoded.username);
     const userId = await User.findById(user);
@@ -143,7 +127,6 @@ export const getCart = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate('items.product');
 
-    // return res.status(200).send({ message: "added to cart" });
     if (!cart) {
       return res.status(404).send({ message: "Cart not found" });
     }
@@ -153,14 +136,10 @@ export const getCart = async (req, res) => {
     return res.status(500).send({ message: "Failed to retrieve cart", error: error.message });
   }
 };
-
-
-
-
 export const deleteCartitem = async (req, res) => {
   try {
     const { productId } = req.params;
-    const { cartId } = req.body; 
+    const { cartId } = req.body;
     if (!cartId) {
       return res.status(400).send({ message: "Cart ID is required" });
     }

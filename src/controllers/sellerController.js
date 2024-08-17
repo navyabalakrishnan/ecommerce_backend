@@ -36,40 +36,35 @@ export const signup = async (req, res) => {
       console.log(error, "Something went  wrong");
     }
   };
-
-
-
-  export const signin = async (req, res) => {
+export const signin = async (req, res) => {
     try {
-      const body = req.body;
-      const { email, password } = body;
-      console.log(body);
+      const { email, password } = req.body;
   
       const seller = await Seller.findOne({ email });
-  
       if (!seller) {
-        return res.send("seller is not found");
+        return res.status(404).send("Seller not found");
       }
   
-      const matchPassword = await bcrypt.compare(
-        password,
-        seller.hashPassword
-      );
-  
-      
+      const matchPassword = await bcrypt.compare(password, seller.hashPassword);
       if (!matchPassword) {
-        return res.send("password is incorrect");
+        return res.status(400).send("Password is incorrect");
       }
   
-      const token = adminToken(seller);
-  
+      const token = adminToken(seller._id);
       res.cookie("token", token);
-      return res.status(200).json({ message: "Logged in!", token });
+  
+      return res.status(200).json({
+        message: "Logged in!",
+        token,
+        sellerId: seller._id,
+        role: seller.role 
+      });
     } catch (error) {
-      console.error("Error", error);
+      console.error("Error during sign-in:", error);
       res.status(500).send("Internal Server Error");
     }
   };
+  
   export const getSellers = async (req, res) => {
     try {
       const sellers = await Seller.find()
