@@ -64,7 +64,7 @@ export const getOrder = async (req, res) => {
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.sendStatus(401);
 
-    const decoded = jwt.verify(token, 'jklres');
+    const decoded = jwt.verify(token,serverConfig.token);
     const seller = await Seller.findOne({ email: decoded.data });
     if (!seller) {
       return res.status(404).json({ message: "Seller not found" });

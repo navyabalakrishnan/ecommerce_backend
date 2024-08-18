@@ -9,7 +9,7 @@ try {
     if (!token) {
       return res.status(401).send({ message: 'Unauthorized' });
     }
-    const decoded = jwt.verify(token, 'jklres');
+    const decoded = jwt.verify(token, serverConfig.token);
     const userId = new mongoose.Types.ObjectId(decoded.username);
 
     if (!userId) {

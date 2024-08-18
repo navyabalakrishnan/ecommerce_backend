@@ -4,6 +4,7 @@ import Seller from "../models/sellerModel.js"
 import jwt from 'jsonwebtoken'
 
 import { cloudinaryInstance } from "../config/cloudinaryConfig.js";
+import serverConfig from "../config/serverConfig.js";
 export const createProduct = async (req, res) => {
   try {
    
@@ -131,7 +132,7 @@ export const getProductsBySeller = async (req, res) => {
       return res.status(401).send({ message: 'Unauthorized' });
     }
 
-    const decoded = jwt.verify(token, 'jklres'); 
+    const decoded = jwt.verify(token,serverConfig.token); 
     console.log("decoded", decoded)
 
     const seller = await Seller.findOne({ email: decoded.data });

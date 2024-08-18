@@ -12,7 +12,7 @@ export const createCart = async (req, res) => {
     if (!token) {
       return res.status(401).send({ message: 'Unauthorized' });
     }
-    const decoded = jwt.verify(token, 'jklres');
+    const decoded = jwt.verify(token, serverConfig.token);
     const userId = new mongoose.Types.ObjectId(decoded.username);
 
     if (!userId) {
@@ -113,7 +113,7 @@ export const getCart = async (req, res) => {
       return res.status(401).send({ message: 'Unauthorized' });
     }
 
-    const decoded = jwt.verify(token, 'jklres');
+    const decoded = jwt.verify(token,serverConfig.token );
 
     const user = new mongoose.Types.ObjectId(decoded.username);
     const userId = await User.findById(user);
