@@ -2,6 +2,7 @@ import Review from '../models/reviewModel.js';
 import Product from '../models/productModel.js';
 import jwt from "jsonwebtoken"
 import mongoose from 'mongoose';
+import serverConfig from '../config/serverConfig.js';
 export const createReview = async (req, res) => {
     const { productId, rating, comment } = req.body;
 try {
