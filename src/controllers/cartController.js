@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import User from '../models/userModel.js';
 import mongoose from "mongoose";
 import serverConfig from "../config/serverConfig.js";
+
 export const createCart = async (req, res) => {
   const { product, quantity } = req.body;
 
@@ -24,8 +25,6 @@ export const createCart = async (req, res) => {
       return res.status(404).send({ message: "Product not found" });
     }
 
-    const price = item.price;
-
     let cart = await Cart.findOne({ userId: userId });
 
     if (cart) {
@@ -35,18 +34,20 @@ export const createCart = async (req, res) => {
       } else {
         cart.items.push({ product, quantity });
       }
-      cart.total = cart.items.reduce((acc, curr) => acc + curr.quantity * price, 0);
-      await cart.save();
-      return res.status(200).send(cart);
     } else {
-      const newCart = await Cart.create({
+      cart = new Cart({
         userId: userId,
         items: [{ product, quantity }],
-        total: quantity * price,
       });
-
-      return res.status(201).send(newCart);
     }
+
+    const products = await Product.find({ '_id': { $in: cart.items.map(item => item.product) } });
+    const productMap = new Map(products.map(product => [product._id.toString(), product.price]));
+
+    cart.total = cart.items.reduce((acc, item) => acc + item.quantity * (productMap.get(item.product.toString()) || 0), 0);
+
+    await cart.save();
+    return res.status(200).send(cart);
   } catch (error) {
     console.error("Error adding to cart:", error);
     return res.status(500).send("Something went wrong");
