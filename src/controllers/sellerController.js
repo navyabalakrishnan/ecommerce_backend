@@ -66,6 +66,7 @@ export const signin = async (req, res) => {
     }
   };
   
+ 
   export const getSellers = async (req, res) => {
     try {
       const sellers = await Seller.find()
@@ -75,7 +76,6 @@ export const signin = async (req, res) => {
       res.status(500).send("Failed to fetch sellers");
     }
   };
-  
   export const deleteSeller = async (req, res) => {
     try {
       const { id } = req.params; 
@@ -85,7 +85,7 @@ export const signin = async (req, res) => {
       }
       res.status(200).send({ message: "Seller deleted successfully" });
     } catch (error) {
-      console.error("Error d elet ing seller:", error);
+      console.error("Error deleting seller:", error);
       res.status(500).send("Failed to delete seller");
     }
   };

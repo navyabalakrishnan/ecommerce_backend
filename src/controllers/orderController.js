@@ -111,6 +111,4 @@ export const cancelOrder = async (req, res) => {
   }
   catch (error) {
     console.log("Error:", error)
-  }
-}
-
+  }}
