@@ -69,7 +69,9 @@ export const signin = async (req, res) => {
  
   export const getSellers = async (req, res) => {
     try {
-      const sellers = await Seller.find()
+      // const sellers = await Seller.find()
+      const sellers = await Seller.find({ role: "seller" });
+
       res.status(200).json(sellers);
     } catch (error) {
       console.error("Error fetching sellers:", error);
