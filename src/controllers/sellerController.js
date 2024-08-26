@@ -1,5 +1,8 @@
 import Seller from "../models/sellerModel.js";
 import bcrypt from "bcrypt"
+import serverConfig from "../config/serverConfig.js";
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 import adminToken from "../utils/adminToken.js";
 export const signup = async (req, res) => {
     try {
@@ -78,6 +81,28 @@ export const signin = async (req, res) => {
       res.status(500).send("Failed to fetch sellers");
     }
   };
+  export const getSellersEmail = async (req, res) => {
+    try {
+      const { sellerId } = req.query;
+      if (!sellerId) {
+        return res.status(400).json({ message: 'Seller ID is required' });
+      }
+  
+      const seller = await Seller.findById(sellerId).select('email');
+      if (!seller) {
+        return res.status(404).json({ message: 'Seller not found' });
+      }
+  
+      res.status(200).json({ email: seller.email });
+    } catch (error) {
+      console.error("Error fetching seller's email:", error);
+      res.status(500).send("Failed to fetch seller's email");
+    }
+  };
+  
+
+
+
   export const deleteSeller = async (req, res) => {
     try {
       const { id } = req.params; 
@@ -118,6 +143,7 @@ export const signin = async (req, res) => {
     signin,
     getSellers,
     deleteSeller,
+    getSellersEmail,
     checkAdmin
   };
   

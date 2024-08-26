@@ -51,9 +51,6 @@ paymentRouter.post("/verify", async (req, res) => {
       .createHmac("sha256", process.env.KEY_SECRET || "s")
       .update(sign.toString())
       .digest("hex");
-
-   
-
     const isAuthentic = expectedSign === razorpay_signature;
     console.log(isAuthentic);
 
