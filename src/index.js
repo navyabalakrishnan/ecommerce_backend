@@ -8,7 +8,7 @@ const app = express();
 app.use(
   cors({
     origin:
-  "https://ecommerce-frontend-sigma-seven.vercel.app/",
+  "https://ecommerce-frontend-sigma-seven.vercel.app",
 
     credentials: true,
   })
