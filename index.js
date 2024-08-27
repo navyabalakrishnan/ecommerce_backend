@@ -7,10 +7,10 @@ import cors from "cors"
 const app = express();
 app.use(
   cors({
-    origin:'*',
-  // "https://ecommerce-frontend-sigma-seven.vercel.app",
+    origin:
+  "https://ecommerce-frontend-sigma-seven.vercel.app",
   // "http://localhost:5173",
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+ 
     credentials: true,
   })
 );
