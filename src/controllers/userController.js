@@ -2,13 +2,12 @@ import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import bcrypt from 'bcrypt';
 export const checkUser = async (req, res) => {
-  try {
+try {
     const user = req.user;
     const findUser = await User.findOne({ email: user.email });
     if (!findUser) {
       return res.send("user not found");
-
-    }
+}
     return res.send("user found")
   }
   catch (error) {

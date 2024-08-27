@@ -9,6 +9,7 @@ app.use(
   cors({
     origin:
   "https://ecommerce-frontend-sigma-seven.vercel.app",
+  // "http://localhost:5173",
 
     credentials: true,
   })
