@@ -16,8 +16,8 @@ const app = express();
 // );
 
 const allowedOrigins = [
-  // "https://test-beta-sooty-98.vercel.app",
-  // "https://test-foks-three.vercel.app"
+ 
+  "https://livec-five.vercel.app"
 ];
 app.use(
   cors({
