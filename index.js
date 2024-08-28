@@ -15,31 +15,41 @@ const app = express();
 //   })
 // );
 
-const allowedOrigins = [
+// const allowedOrigins = [
  
-  "https://livec-five.vercel.app"
-];
+//   "https://livec-five.vercel.app"
+// ];
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       // Allow requests with no origin, like mobile apps or curl requests
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.includes(origin)) {
+//         return callback(null, true);
+//       } else {
+//         return callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     allowedHeaders: [
+//       "Content-Type",
+//       "Authorization",
+//       "X-Requested-With",
+//       "X-CSRF-Token",
+//       "Access-Control-Allow-Origin"
+//     ],
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+//   })
+// );
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin, like mobile apps or curl requests
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
+  cors(
+      {
+          origin: [ "http://localhost:5173"],
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization'],
+          credentials: true,
       }
-    },
-    credentials: true,
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "X-CSRF-Token",
-      "Access-Control-Allow-Origin"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-  })
+  )
 );
 
 app.use(cookieParser())
