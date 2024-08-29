@@ -33,7 +33,8 @@ export const signup = async (req, res) => {
       }
   
       const token = adminToken(newSellerCreated._id);
-      res.cookie("token", token);
+      // res.cookie("token", token);
+      res.cookie("token", token,{sameSite:"None", secure:true});
       return res.status(200).json({ message: "Signed up successfully!", token });
     } catch (error) {
       console.log(error, "Something went  wrong");
@@ -55,7 +56,8 @@ export const signin = async (req, res) => {
       }
   
       const token = adminToken(seller);
-      res.cookie("token", token);
+      // res.cookie("token", token);
+      res.cookie("token", token,{sameSite:"None", secure:true});
   
       return res.status(200).json({
         message: "Logged in!",
