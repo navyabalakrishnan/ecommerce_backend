@@ -9,7 +9,7 @@ import Seller from '../models/sellerModel.js';
 
 export const createOrder = async (req, res) => {
   try {
-    const { full_name, email, shippingAddress, paymentMethod } = req.body;
+    const { full_name, email, shippingAddress } = req.body;
 
     const token = req.cookies.token;
     if (!token) {
@@ -26,7 +26,7 @@ export const createOrder = async (req, res) => {
     if (!cart || cart.items.length === 0) {
       return res.status(404).send({ message: "Cart is empty or not found" });
     }
-    const paymentStatus = paymentMethod === 'cash_on_delivery' ? 'unpaid' : 'paid';
+    
     let totalAmount = 0;
     const orderProducts = cart.items.map(item => {
       totalAmount += item.quantity * item.product.price;
@@ -36,8 +36,7 @@ export const createOrder = async (req, res) => {
         seller: item.product.seller,
       };
     });
-    console.log("paymentStatus", paymentStatus)
-    console.log("paymentMethod", paymentMethod)
+   
     const newOrder = new Order({
       userId,
       full_name,
@@ -45,12 +44,11 @@ export const createOrder = async (req, res) => {
       products: orderProducts,
       totalAmount,
       shippingAddress,
-      paymentMethod,
-      paymentStatus,
+    
     });
     const savedOrder = await newOrder.save();
     await Cart.updateOne({ userId }, { $set: { items: [], total: 0 } });
-    return res.status(201).send({ message: "Order created successfully", order: savedOrder });
+    return res.status(201).send({ message: "Order created successfully",  orderId: savedOrder._id});
   } catch (error) {
     console.error("Error creating order:", error);
     return res.status(500).send({ message: "Failed to create order", error: error.message });
@@ -100,6 +98,32 @@ export const getAllOrders = async (req, res) => {
     res.status(500).send("Failed to fetch data");
   }
 };
+
+
+
+export const getOrderByuserId = async (req, res) => {
+try {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized" });
+  }
+  console.log(token)
+  const decoded = jwt.verify(token, serverConfig.token);
+  console.log("decoded", decoded)
+  const user = new mongoose.Types.ObjectId(decoded.username);
+  const userId = await User.findById(user);
+  const orders = await Order.find({ userId }).populate('products.product');
+  
+  if (!orders.length) {
+    return res.status(404).json({ message: 'No orders found for this user' });
+  }
+  
+  res.json(orders);
+} catch (error) {
+  res.status(500).json({ message: 'Server error', error });
+}
+}
+
 
 
 export const cancelOrder = async (req, res) => {

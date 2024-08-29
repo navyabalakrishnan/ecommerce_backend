@@ -17,7 +17,9 @@ const paymentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-
+  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
+  paymentStatus: { type: String, enum: ['paid', 'unpaid'], default: 'unpaid' },
+  paymentMethod: { type: String, enum: ['credit_card', 'paypal', 'onlinePayment'], required: true }
 });
 
 export default mongoose.model("Payment", paymentSchema);

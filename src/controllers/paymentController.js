@@ -5,14 +5,14 @@ import crypto from "crypto";
 import Payment from "../models/paymentModel.js";
 import razorpayInstance from "../config/razorPayInstance.js";
 
-
+import Order from "../models/orderModel.js";
 dotenv.config();
 
 const paymentRouter = express.Router();
 
 
 paymentRouter.post("/order", (req, res) => {
-  const { amount } = req.body;
+  const { amount,orderId } = req.body;
 
   try {
     const options = {
@@ -36,42 +36,41 @@ paymentRouter.post("/order", (req, res) => {
 });
 
 paymentRouter.post("/verify", async (req, res) => {
-  console.log("very hitted");
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-    req.body;
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSignature = crypto.createHmac('sha256', process.env.KEY_SECRET).update(body).digest('hex');
 
-  console.log("req.body", req.body);
-
-  try {
-    const sign = razorpay_order_id + "|" + razorpay_payment_id;
-
-   
-    const expectedSign = crypto
-      .createHmac("sha256", process.env.KEY_SECRET || "s")
-      .update(sign.toString())
-      .digest("hex");
-    const isAuthentic = expectedSign === razorpay_signature;
-    console.log(isAuthentic);
-
-    if (isAuthentic) {
-      const payment = new Payment({
+  if (expectedSignature === razorpay_signature) {
+    try {
+      const newPayment = new Payment({
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
-  
+        orderId,
+        paymentStatus: 'paid', 
+        paymentMethod: 'onlinePayment' 
+        
       });
+      await newPayment.save();
+      const updatedOrder = await Order.findByIdAndUpdate(orderId, {
+        paymentStatus: 'paid',
+        paymentMethod: 'onlinePayment'
+      }, { new: true });
 
-      await payment.save();
+      if (!updatedOrder) {
+        console.log(`Order with ID ${orderId} not found.`);
+        return res.status(404).json({ message: "Order Not Found" });
+      }
 
-    //   res.json({
-    //     message: "Payment Successfully completed",
-    //   });
-    res.status(200).json({ message: "Payment Successfully" });    }
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server Error!" });
-    console.log(error);
+      console.log('Payment Verified and Saved:', { orderId, razorpay_order_id, razorpay_payment_id }); 
+      res.json({ message: "Payment Successfully" });
+    } catch (error) {
+      console.error("Error updating order:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  } else {
+    res.status(400).json({ message: "Payment Verification Failed" });
   }
 });
-
 export default paymentRouter;
