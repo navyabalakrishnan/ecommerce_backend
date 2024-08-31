@@ -7,7 +7,11 @@ function authenticateUser(req, res, next) {
   jwt.verify(token, serverConfig.token, (err, user) => {
     console.log(err);
 
-    if (err) return res.sendStatus(403);
+    if (err) 
+      {
+        console.log(err)
+        return res.status(401).send("not verified")
+    }
 
     req.user = user;
     console.log(req.user.role);

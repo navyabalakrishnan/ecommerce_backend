@@ -1,19 +1,9 @@
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import bcrypt from 'bcrypt';
-export const checkUser = async (req, res) => {
-try {
-    const user = req.user;
-    const findUser = await User.findOne({ email: user.email });
-    if (!findUser) {
-      return res.send("user not found");
-}
-    return res.send("user found")
-  }
-  catch (error) {
-    console.log(error)
-  }
-}
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
+import serverConfig from "../config/serverConfig.js";
 export const signup = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -78,5 +68,26 @@ export const signin = async (req, res) => {
   } catch (error) {
     console.log(error, "Something went wrong");
     res.status(500).send("Internal Server Error");
+  }
+};
+
+export const checkUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).send({ message: 'Unauthorized' });
+    }
+    const decoded = jwt.verify(token, serverConfig.token);
+    const user = new mongoose.Types.ObjectId(decoded.username);
+    const userId = await User.findById(user);
+
+    if (userId) {
+      return res.status(200).send("User  found");
+    }
+    return res.status(404).send("User not found");
+   }
+    catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };

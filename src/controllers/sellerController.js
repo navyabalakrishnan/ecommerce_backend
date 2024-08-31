@@ -121,24 +121,24 @@ export const signin = async (req, res) => {
   export const checkAdmin=async (req,res)=>
   {
     try{
-      const seller=req.user;
-      console.log(seller)
-      const findSeller=await Seller.findOne({
-        email:seller.email
-      })
-      if(!findSeller){
-        return res.json({ success:false});
+      const token = req.cookies.token;
+      if (!token) {
+        return res.status(401).send({ message: "Unauthorized" });
       }
-
-        return res.json({ success:true});
-      
-      }
-    
-    
-    catch(error){
+      console.log(token)
+      const decoded = jwt.verify(token, serverConfig.token);
+      console.log("decoded", decoded)
+      const seller = new mongoose.Types.ObjectId(decoded.username);
+      const sellerId = await Seller.findById(seller);
+     if (sellerId) {
+        return res.send("seller  found");
+  }
+      return res.send("seller  not found")
+    }
+    catch (error) {
       console.log(error)
     }
-  }
+}
  
   export default {
     signup,
