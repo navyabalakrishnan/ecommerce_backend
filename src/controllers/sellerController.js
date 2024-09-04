@@ -118,7 +118,28 @@ export const signin = async (req, res) => {
       res.status(500).send("Failed to delete seller");
     }
   };
-  export const checkAdmin=async (req,res)=>
+  export const checkSeller=async (req,res)=>
+  {
+    try{
+      const token = req.cookies.token;
+      if (!token) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+      console.log(token)
+      const decoded = jwt.verify(token, serverConfig.token);
+      if(decoded.role === 'seller')
+        {
+         return res.send("seller found")
+        }
+        else{
+          return res.send("seller not found")
+        }}
+    catch (error) {
+      console.log(error)
+    }
+}
+ 
+export const checkAdmin=async (req,res)=>
   {
     try{
       const token = req.cookies.token;
@@ -128,24 +149,32 @@ export const signin = async (req, res) => {
       console.log(token)
       const decoded = jwt.verify(token, serverConfig.token);
       console.log("decoded", decoded)
-      const seller = new mongoose.Types.ObjectId(decoded.username);
-      const sellerId = await Seller.findById(seller);
-     if (sellerId) {
-        return res.send("seller  found");
-  }
-      return res.send("seller  not found")
+      if(decoded.role === 'admin')
+      {
+       return res.send("admin found")
+      }
+      else{
+        return res.send("admin not found")
+      }
+  //     const admin = new mongoose.Types.ObjectId(decoded.role);
+  //     const adminId = await Seller.findById(admin);
+  //    if (adminId) {
+  //       return res.send("seller  found");
+  // }
+  //     return res.send("seller  not found")
+  //   }
     }
     catch (error) {
       console.log(error)
     }
 }
- 
   export default {
     signup,
     signin,
     getSellers,
     deleteSeller,
     getSellersEmail,
+    checkSeller,
     checkAdmin
   };
   

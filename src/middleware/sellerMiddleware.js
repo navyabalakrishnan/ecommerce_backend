@@ -12,9 +12,10 @@ const authenticateSeller=(req,res,next)=>
             return res.status(401).send("not verified")
         } 
         console.log("role",result.role)
-        if(result.role !== "seller" && result.role !== "admin" )
+        // if(result.role !== "seller" && result.role !== "admin" )
+        if(result.role !== "seller" )
         {
-            return res.status(401).send("not seller and admin")
+            return res.status(401).send("not seller")
         }
             req.user=result;
             next();
