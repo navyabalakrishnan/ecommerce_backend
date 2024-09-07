@@ -4,7 +4,10 @@ import serverConfig from "../config/serverConfig.js";
 const authenticateSeller=(req,res,next)=>
 {
     const token=req.cookies.token;
-    console.log('Token:', token); 
+    if (!token) {
+        return res.status(401).send({ message: "Unauthorized: No token provided" });
+      }
+   
    
     jwt.verify(token,serverConfig.token,(err,result)=>{
         if (err) {
