@@ -13,7 +13,7 @@ sellerRouter.get("/check-admin",authenticateAdmin,checkAdmin);
 
 sellerRouter.get("/check-seller",authenticateSeller,checkSeller);
 sellerRouter.post("/logout", (req, res) => {
-    res.clearCookie('token'); 
+    res.removeCookie('token');
     res.status(200).send({ message: 'Logged out successfully' });
 });
 export default sellerRouter;

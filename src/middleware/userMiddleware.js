@@ -3,9 +3,11 @@ import jwt from "jsonwebtoken";
 import serverConfig from "../config/serverConfig.js";
 function authenticateUser(req, res, next) {
   const token = req.cookies.token;
-
-  jwt.verify(token, serverConfig.token, (err, user) => {
-    console.log(err);
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized: No token provided" });
+  }
+  jwt.verify(token,serverConfig.token, (err, user) => {
+   
 
     if (err) 
       {

@@ -146,7 +146,7 @@ export const checkAdmin=async (req,res)=>
       if (!token) {
         return res.status(401).send({ message: "Unauthorized" });
       }
-      console.log(token)
+     
       const decoded = jwt.verify(token, serverConfig.token);
       console.log("decoded", decoded)
       if(decoded.role === 'admin')
