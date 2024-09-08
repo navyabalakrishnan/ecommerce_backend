@@ -6,16 +6,16 @@ import mongoose from "mongoose";
 import adminToken from "../utils/adminToken.js";
 export const signup = async (req, res) => {
     try {
-      console.log(req.body);
+      
   
       const { name,email,password,confirmPassword } = req.body;
       if (password !== confirmPassword) {
-        return res.status(400).send("Passwords do not match");
+        return res.status(400).json({message:"Passwords do not match"});
       }
       const sellerExist = await Seller.findOne({ email });
       if (sellerExist) {
-        return res.send("Seller already exist");
-      }
+        return res.status(400).json({ message: "Seller already exists" });
+     }
   
       const saltRounds = 10;
       const hashPassword = await bcrypt.hash(password, saltRounds);
@@ -38,6 +38,7 @@ export const signup = async (req, res) => {
       return res.status(200).json({ message: "Signed up successfully!", token });
     } catch (error) {
       console.log(error, "Something went  wrong");
+      res.status(500).send("Internal Server Error");
     }
   };
 export const signin = async (req, res) => {
